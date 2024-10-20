@@ -3,7 +3,7 @@ name: Deploy to S3
 on:
   push:
     branches:
-      - main  # Make sure you're pushing to the 'main' branch to trigger the deployment
+      - main  # Ensure the workflow runs when pushing to the 'main' branch
 
 jobs:
   deploy:
@@ -16,21 +16,30 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Use Node.js 18.x
+          node-version: '18'  # Ensure you're using Node.js 18.x
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
+      - name: Build and export project
         run: |
           npm run build  # Build the project
-          npm run export  # Export the static site
+          npm run export  # Export the static site to the 'out' directory
 
       - name: Deploy to S3
         run: |
-          aws s3 sync ./out s3://$S3_BUCKET_NAME --delete  # Sync the 'out' directory with your S3 bucket
+          aws s3 sync ./out s3://$S3_BUCKET_NAME --delete  # Sync the 'out' directory with the S3 bucket
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+
+      - name: Invalidate CloudFront cache
+        if: success()
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
