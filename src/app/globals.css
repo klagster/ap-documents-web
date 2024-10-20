@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+:root { 
   --background: #ffffff;  /* Always white background */
   --foreground: #171717;  /* Dark foreground text */
 }
