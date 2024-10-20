@@ -1,6 +1,6 @@
 "use client";
 
-import Navbar from "../components/navbar.js";  // Ensure the correct path to the Navbar component
+import Navbar from "../../components/navbar.js";  // Ensure the correct path to the Navbar component
 
 export default function Home() {
   return (
