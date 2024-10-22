@@ -1,29 +1,25 @@
 'use client';
 
 import { useState } from 'react';
-import { Worker, Viewer } from '@react-pdf-viewer/core'; // Core viewer
-import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout'; // Default layout plugin
-import '@react-pdf-viewer/core/lib/styles/index.css'; // Core viewer styles
-import '@react-pdf-viewer/default-layout/lib/styles/index.css'; // Plugin styles
 
-export default function Documents() {
+export default function OQuery() {
   const [query, setQuery] = useState(`{
-    "file_key": "emails/attachments/_6XR0XZ3R9.PDF"
-  }`);
-  const [url, setUrl] = useState('');
-  const [error, setError] = useState('');
+    "query": {
+      "match_all": {}
+    },
+    "_source": [ "document_id", "Classification" ]
+  }`); // Set the initial state with your JSON query string
+  const [results, setResults] = useState([]); // Holds the search results
+  const [error, setError] = useState(''); // Holds any errors
 
-  // Plugin for default toolbar and layout
-  const defaultLayoutPluginInstance = defaultLayoutPlugin();
-
-  // Handle search button click
+  // Function to handle the search when the button is clicked
   const handleSearch = async () => {
     setError('');
-    setUrl('');
     try {
+      // Parse the query string into JSON
       const parsedQuery = JSON.parse(query);
 
-      const response = await fetch('https://1wvw93ix0j.execute-api.us-east-1.amazonaws.com/prod/generate-presigned-url', {
+      const response = await fetch('https://4psoef8lpd.execute-api.us-east-1.amazonaws.com/prod/search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -36,8 +32,7 @@ export default function Documents() {
       }
 
       const data = await response.json();
-      setUrl(data.url); 
-      
+      setResults(data); // Set the search results
     } catch (err) {
       console.error(err);
       setError('Error: ' + err.message);
@@ -46,7 +41,7 @@ export default function Documents() {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Presigned URL Generator</h1>
+      <h1>Documents Search</h1>
 
       <div style={{
         border: '2px solid #ccc',
@@ -60,9 +55,9 @@ export default function Documents() {
           id="query"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          rows="4"
+          rows="8"
           cols="50"
-          placeholder='{"file_key": "emails/attachments/_6XR0XZ3R9.PDF"}'
+          placeholder="Enter your search query in JSON format"
           style={{
             width: '100%',
             padding: '10px',
@@ -90,43 +85,30 @@ export default function Documents() {
         onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
         onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#007BFF'}
       >
-        Display PDF
+        Start Search
       </button>
 
       {error && <div style={{ color: 'red', marginTop: '20px' }}>{error}</div>}
 
       <div style={{
         marginTop: '20px',
-        padding: '15px',
-        backgroundColor: '#f9f9f9',
+        maxHeight: '400px',
+        overflowY: 'auto',
         border: '2px solid #ccc',
         borderRadius: '10px',
-        minHeight: '100px',
+        padding: '15px',
+        backgroundColor: '#f9f9f9',
       }}>
-        <h2>Generated URL</h2>
-        {url ? (
-          <>
-            <a 
-              href={url} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              style={{ color: '#007BFF', textDecoration: 'underline' }}
-            >
-              Click here to access the file
-            </a>
-
-            <div style={{ marginTop: '20px' }}>
-              <h2>PDF Viewer</h2>
-              <div style={{ height: '600px' }}>
-                <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
-                  <Viewer fileUrl={url} plugins={[defaultLayoutPluginInstance]} />
-                </Worker>
-              </div>
-            </div>
-          </>
-        ) : (
-          <p>No URL generated yet. Run a query to generate a presigned URL.</p>
-        )}
+        <h2>Results</h2>
+        <pre style={{
+          backgroundColor: '#fff',
+          border: '1px solid #ddd',
+          borderRadius: '5px',
+          padding: '10px',
+          boxShadow: '2px 2px 5px rgba(0, 0, 0, 0.1)',
+        }}>
+          {JSON.stringify(results, null, 2)}
+        </pre>
       </div>
     </div>
   );

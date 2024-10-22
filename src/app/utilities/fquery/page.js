@@ -6,7 +6,7 @@ import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout'; // Defau
 import '@react-pdf-viewer/core/lib/styles/index.css'; // Core viewer styles
 import '@react-pdf-viewer/default-layout/lib/styles/index.css'; // Plugin styles
 
-export default function Documents() {
+export default function FQuery() {
   const [query, setQuery] = useState(`{
     "file_key": "emails/attachments/_6XR0XZ3R9.PDF"
   }`);
@@ -103,17 +103,9 @@ export default function Documents() {
         borderRadius: '10px',
         minHeight: '100px',
       }}>
-        <h2>Generated URL</h2>
         {url ? (
           <>
-            <a 
-              href={url} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              style={{ color: '#007BFF', textDecoration: 'underline' }}
-            >
-              Click here to access the file
-            </a>
+            
 
             <div style={{ marginTop: '20px' }}>
               <h2>PDF Viewer</h2>
